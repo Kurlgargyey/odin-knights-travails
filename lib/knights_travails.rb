@@ -7,10 +7,6 @@ class Square
     @coords = [col, row]
   end
 
-  def move(movecoords)
-    Square.new(col + movecoords[0], row + movecoords[1])
-  end
-
   def ==(other)
     @coords[0] == other.coords[0] &&
       @coords[1] == other.coords[1]
@@ -24,6 +20,12 @@ class Node
     @square = square
     @children = []
     @children << children
+  end
+
+  private
+
+  def child(square, movecoords)
+    Square.new(square.coords[0] + movecoords[0], square.coords[1] + movecoords[1])
   end
 
 end
