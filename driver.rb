@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
-require './lib/knights_travails.rb'
+require './lib/knights_travails'
 
 knight = Knight.new
 
-start = [3, 3]
+start = [7, 7]
 goal = [0, 0]
 
 knight.moves(start, goal)

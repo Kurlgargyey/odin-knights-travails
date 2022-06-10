@@ -1,73 +1,80 @@
 # frozen_string_literal: true
 
-class Square
-  attr_accessor :coords
-
-  def initialize(col, row)
-    @coords = [col, row]
-  end
-
-  def ==(other)
-    @coords[0] == other.coords[0] &&
-      @coords[1] == other.coords[1]
-  end
-end
+require 'matrix'
 
 class Node
-  attr_accessor :square, :children
+  attr_accessor :children
+  attr_reader :history, :square
 
-  def initialize(square = nil)
-    @square = square
+  def initialize(square = [0, 0], history = [])
+    @square = Vector.elements(square.to_a)
     @children = []
-    @children << children
+    @history = []
+    @history.concat(history)
+    @history << @square
   end
 
-  private
-
-  def child(square, movecoords)
-    Square.new(square.coords[0] + movecoords[0], square.coords[1] + movecoords[1])
+  def to_s
+    "Node: #{square}\nHistory: #{history}"
   end
-
 end
 
 class Board
-  attr_accessor :squares
+  attr_reader :squares
 
   def initialize(dimensions = 8)
     @squares = []
 
     dimensions.times do |i1|
       dimensions.times do |i2|
-        @squares << Square.new(i1, i2)
+        @squares << Vector[i1, i2]
       end
     end
   end
 end
 
 class Knight
-
   def initialize
     @board = Board.new
-    @root = build_tree
+    @movement = []
+    @movement.concat([1, -1].product([2, -2]))
+    @movement.concat([2, -2].product([1, -1]))
+    @movement.map! { |move| Vector.elements(move) }
   end
 
-  def knight_moves
-
+  def moves(start, target)
+    start = Node.new(start)
+    target = Vector.elements(target)
+    result = search_move_tree(target, start)
+    puts "\nRoute found!"
+    puts "The journey took #{result.history.length - 1} moves."
+    puts 'We visited the following squares:'
+    result.history.each do |step|
+      print "#{step.to_a} "
+      print "\n"
+    end
+    print "\n"
   end
 
   private
 
-  def build_tree
-    node = Node.new(data)
+  def search_move_tree(target, node)
+    queue = [node]
+    curr = node
 
-    if root.nil?
-      @root = node
-      return
+    until curr.square == target
+      curr = queue.shift
+      add_children(curr)
+      curr.children.each do |child|
+        queue << child
+      end
     end
+    curr
+  end
 
-    root.children.each do |child|
-
-    end
+  def add_children(node)
+    children = @movement.map { |move| move + node.square }
+    children.reject! { |child| child.to_a.any? { |coord| coord.negative? || coord > 7 } }
+    children.each { |child| node.children << Node.new(child, node.history) }
   end
 end
-
