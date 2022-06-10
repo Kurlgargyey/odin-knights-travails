@@ -11,12 +11,8 @@ class Node
     @square = Vector.elements(square.to_a)
     @children = []
     @history = []
-    @history.concat(history)
-    @history << @square
-  end
-
-  def to_s
-    "Node: #{square}\nHistory: #{history}"
+               .concat(history)
+               .push(@square)
   end
 
   def to_a
@@ -42,12 +38,12 @@ end
 # The Knight class has a board and an array of legal movement vectors.
 # Its #moves method traverses a tree of potential moves in breadth-first order using the given starting square as root.
 class Knight
-  def initialize
-    @board = Board.new
+  def initialize(dimensions = 8)
+    @board = Board.new(dimensions)
     @movement = []
     @movement.concat([1, -1].product([2, -2]))
-    @movement.concat([2, -2].product([1, -1]))
-    @movement.map! { |move| Vector.elements(move) }
+             .concat([2, -2].product([1, -1]))
+             .map! { |move| Vector.elements(move) }
   end
 
   def moves(start, goal)
@@ -65,22 +61,21 @@ class Knight
   private
 
   def search_move_tree(goal, node)
-    queue = [node]
+    queue = []
     curr = node
 
     until curr.square == goal
-      curr = queue.shift
-      add_children(curr)
+      add_children(curr) # I only add the children here so that I don't have to build branches the search never gets to.
       curr.children.each do |child|
         queue << child
       end
+      curr = queue.shift
     end
     curr.history.map(&:to_a)
   end
 
   def add_children(node)
     children = @movement.map { |move| move + node.square }.intersection(@board.squares)
-    # children.reject! { |child| child.to_a.any? { |coord| coord.negative? || coord > 7 } }
     children.each { |child| node.children << Node.new(child, node.history) }
   end
 end
